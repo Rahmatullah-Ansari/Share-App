@@ -25,21 +25,23 @@
                 android:layout_height="match_parent"
                 android:id="@+id/app_icon"/>
         </androidx.cardview.widget.CardView>
+
         <TextView
+            android:id="@+id/app_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/app_name"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@id/shareApp"
             android:layout_toEndOf="@id/icon_card"
+            android:ellipsize="end"
+            android:text="App Name"
+            android:singleLine="true"
+            android:textAllCaps="false"
             android:textColor="@color/teal_200"
             android:textSize="18sp"
-            android:textStyle="bold|italic"
-            android:textAllCaps="false"
-            android:text="App Name"
-            android:layout_marginEnd="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_alignParentTop="true"
-            android:ellipsize="end"
-            />
+            android:textStyle="bold|italic" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,12 +50,24 @@
             android:textColor="@color/teal_200"
             android:textSize="16sp"
             android:textStyle="bold|italic"
+            android:singleLine="true"
             android:textAllCaps="false"
             android:text="App Size"
+            android:layout_toStartOf="@id/shareApp"
             android:layout_below="@id/app_name"
             android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
             android:ellipsize="end"
+            />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_share"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/shareApp"
+            android:backgroundTint="@color/white"
             />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

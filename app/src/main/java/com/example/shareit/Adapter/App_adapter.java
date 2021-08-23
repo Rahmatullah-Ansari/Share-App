@@ -1,16 +1,18 @@
 package com.example.shareit.Adapter;
+import static androidx.core.content.FileProvider.getUriForFile;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewbinding.BuildConfig;
-
 import com.example.shareit.Model.Model_app;
 import com.example.shareit.R;
 
@@ -30,18 +32,36 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.app_row,parent,false));
     }
     @Override
-    public void onBindViewHolder(@NonNull App_adapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull App_adapter.ViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         holder.app_name.setText(arrayList.get(position).getApp_name());
         holder.app_size.setText(get_actual_size(arrayList.get(position).getSize()));
         holder.App_icon.setImageDrawable(arrayList.get(position).getIcon());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.share_app.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent();
-                intent.setAction(Intent.ACTION_SEND);
+                Share_app(position);
             }
         });
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent=new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,"com.example.shareit.provider",new File(arrayList.get(position).getPath())));
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setType("application/vnd.android.package-archive");
+            //intent.setType("plain/text");
+            context.startActivity(Intent.createChooser(intent,"Share with").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        });
     }
+    private void Share_app(int position) {
+        Intent intent=new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context,"com.example.shareit.provider",new File(arrayList.get(position).getPath())));
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setType("application/vnd.android.package-archive");
+        //intent.setType("plain/text");
+        context.startActivity(Intent.createChooser(intent,"Share with").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
     private String get_actual_size(long size) {
         String app_size;
         if (size<1024){
@@ -62,7 +82,6 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
     public int getItemCount() {
         return arrayList.size();
     }
-
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -70,11 +89,13 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder{
         ImageView App_icon;
         TextView app_name,app_size;
+        ImageButton share_app;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             App_icon=itemView.findViewById(R.id.app_icon);
             app_name=itemView.findViewById(R.id.app_name);
             app_size=itemView.findViewById(R.id.app_size);
+            share_app=itemView.findViewById(R.id.shareApp);
         }
     }
 }
