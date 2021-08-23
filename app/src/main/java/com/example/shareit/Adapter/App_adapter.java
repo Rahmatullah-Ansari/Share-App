@@ -1,8 +1,14 @@
 package com.example.shareit.Adapter;
 import static androidx.core.content.FileProvider.getUriForFile;
+
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,14 +16,29 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.shareit.Activity.MainActivity;
 import com.example.shareit.Model.Model_app;
 import com.example.shareit.R;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 
 public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
     Context context;
@@ -31,17 +52,37 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
     public App_adapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.app_row,parent,false));
     }
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onBindViewHolder(@NonNull App_adapter.ViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         holder.app_name.setText(arrayList.get(position).getApp_name());
         holder.app_size.setText(get_actual_size(arrayList.get(position).getSize()));
         holder.App_icon.setImageDrawable(arrayList.get(position).getIcon());
-        holder.share_app.setOnClickListener(new View.OnClickListener() {
+        holder.share_app.setOnClickListener(view -> Share_app(position));
+        holder.save_app.setOnClickListener(view -> {
+                Dexter.withContext(context).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(new MultiplePermissionsListener() {
             @Override
-            public void onClick(View view) {
-                Share_app(position);
+            public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                File folder=new File(Environment.getExternalStorageDirectory()+File.separator+"Apks");
+                if (!folder.exists() && !folder.isDirectory()){
+                    folder.mkdir();
+                }
             }
-        });
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                permissionToken.continuePermissionRequest();
+            }
+        }).check();
+                Uri uri= Uri.parse(arrayList.get(position).getPath());
+                File source=new File(String.valueOf(uri));
+                File des=new File(Environment.getExternalStorageDirectory()+File.separator+"Apks"+File.separator+arrayList.get(position).getApp_name()+".apk");
+                try{
+                    Files.copy(source.toPath(),des.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    Toast.makeText(context, "saved at location :-"+Environment.getExternalStorageDirectory()+File.separator+"Apks", Toast.LENGTH_SHORT).show();
+                }catch (Exception e){
+                    Toast.makeText(context, "Failed due to :-"+e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+    });
         holder.itemView.setOnClickListener(view -> {
             Intent intent=new Intent();
             intent.setAction(Intent.ACTION_SEND);
@@ -89,13 +130,14 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder{
         ImageView App_icon;
         TextView app_name,app_size;
-        ImageButton share_app;
+        ImageButton share_app,save_app;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             App_icon=itemView.findViewById(R.id.app_icon);
             app_name=itemView.findViewById(R.id.app_name);
             app_size=itemView.findViewById(R.id.app_size);
             share_app=itemView.findViewById(R.id.shareApp);
+            save_app=itemView.findViewById(R.id.save_app);
         }
     }
 }
