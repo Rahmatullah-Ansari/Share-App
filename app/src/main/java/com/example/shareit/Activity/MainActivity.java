@@ -1,22 +1,28 @@
 package com.example.shareit.Activity;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ProgressBar;
 
 import com.example.shareit.Adapter.App_adapter;
 import com.example.shareit.Model.Model_app;
+import com.example.shareit.R;
 import com.example.shareit.databinding.ActivityMainBinding;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -31,11 +37,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     ArrayList<Model_app> arrayList;
     RecyclerView recyclerView;
+    App_adapter adapter;
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         arrayList=new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-        App_adapter adapter=new App_adapter(getApplicationContext(),arrayList);
+        adapter=new App_adapter(getApplicationContext(),arrayList);
         recyclerView.setAdapter(adapter);
         //get_apps_list
         PackageManager packageManager=getApplicationContext().getPackageManager();
@@ -66,7 +72,24 @@ public class MainActivity extends AppCompatActivity {
         }
         Collections.sort(arrayList, Comparator.comparing(model_app -> model_app.getApp_name().toLowerCase()));
     }
-
+    /*@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.option_menu,menu);
+        MenuItem item=menu.findItem(R.id.search);
+        SearchView searchView=(SearchView)item.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        return true;
+    }*/
     private void create_folder(String Apks) {
         Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE).withListener(new MultiplePermissionsListener() {
             @Override

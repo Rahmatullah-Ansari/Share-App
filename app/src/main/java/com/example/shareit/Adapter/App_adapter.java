@@ -5,6 +5,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -13,6 +14,8 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,14 +41,17 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
+public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> implements Filterable {
     Context context;
-    ArrayList<Model_app> arrayList;
+    List<Model_app> arrayList;
+    List<Model_app> searched;
     public App_adapter(Context context, ArrayList<Model_app> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
+        this.searched=new ArrayList<>(arrayList);
     }
     @NonNull
     @Override
@@ -140,4 +146,36 @@ public class App_adapter extends RecyclerView.Adapter<App_adapter.ViewHolder> {
             save_app=itemView.findViewById(R.id.save_app);
         }
     }
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
+    Filter filter=new Filter() {
+        //run on background thread
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Model_app> files = new ArrayList<>();
+            if (constraint.toString().isEmpty()) {
+                files.addAll(searched);
+            } else {
+                for (Model_app file : searched) {
+                    if (file.getApp_name().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        files.add(file);
+                    }
+                }
+            }
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = files;
+            return filterResults;
+        }
+
+        //run on ui thread.
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            arrayList.clear();
+            arrayList.addAll((Collection<? extends Model_app>) results.values);
+            notifyDataSetChanged();
+        }
+    };
 }

@@ -1,5 +1,4 @@
 package com.example.shareit.Activity;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.view.animation.AnimationUtils;
 
 import com.example.shareit.R;
 import com.example.shareit.databinding.ActivitySplashBinding;
-
 public class splash extends AppCompatActivity {
     ActivitySplashBinding binding;
     @Override
